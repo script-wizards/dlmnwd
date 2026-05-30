@@ -1,0 +1,8 @@
+{
+  "id": "0101",
+  "name": "The Sample Standing Stone",
+  "region": "Sample Wood",
+  "terrain": "Heath",
+  "entry": "A leaning monolith furred with grey lichen. At dusk it casts a shadow pointing toward water. Invented sample hex, not canon.",
+  "links": ["bramblewight", "thornling"]
+}

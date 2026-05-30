@@ -1,0 +1,912 @@
+/* Dolmenwood tools: a light-mode "textmode" character sheet. Type system follows
+   the pixel-terminal look: Departure Mono does the workhorse reading, and Basteleur
+   is reserved for one display moment, the character name. Palette is a light
+   inversion of that stone/gold: warm parchment, ink, ember. */
+
+/* Both faces are SIL Open Font License 1.1. Licence text sits beside them in
+   web/fonts/, and NOTICE.md records the scope. Basteleur carries a Reserved Font
+   Name, so the family is never renamed or re-released under another name. */
+@font-face {
+  font-family: "Departure Mono";
+  src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Basteleur";
+  src: url("./fonts/Basteleur-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --paper: #f1e7cf; /* warm parchment field behind everything */
+  --paper-2: #f6efdb; /* panel fill (a touch lighter) */
+  --paper-sunk: #e7dabb; /* sunken well fill */
+  --ink: #241d14; /* near-black warm ink */
+  --ink-soft: #6f6147; /* secondary / muted text */
+  --faint: #c3b48f; /* hairlines, dotted fill, disabled */
+
+  --ember: #cf3a26; /* primary accent: red */
+  --ember-2: #d7642f; /* secondary accent: orange */
+  --moss: #5f6b34; /* tertiary glyph accent: wood green */
+
+  --line: #8a7350; /* frame borders, softened warm sepia */
+  --line-soft: #d3c39c; /* inner hairlines */
+
+  --display: "Basteleur", Georgia, serif; /* character name only */
+  --ui: "Departure Mono", ui-monospace, monospace; /* titles, labels, numbers */
+  --body: "Departure Mono", ui-monospace, monospace; /* reading text */
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background-color: var(--paper);
+  color: var(--ink);
+  font: 16px/1.45 var(--body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Layout ────────────────────────────────────────────────────────────── */
+
+.shell {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: clamp(0.9rem, 2.4vw, 1.6rem);
+  display: grid;
+  grid-template-columns: minmax(220px, 256px) 1fr;
+  grid-template-areas:
+    "head head"
+    "rail sheet"
+    "foot foot";
+  gap: clamp(0.7rem, 1.4vw, 1.1rem);
+}
+
+.masthead {
+  grid-area: head;
+}
+.rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.7rem, 1.4vw, 1.1rem);
+  position: sticky;
+  top: 0.9rem;
+}
+.canvas {
+  grid-area: sheet;
+  display: flex;
+}
+.colophon {
+  grid-area: foot;
+}
+
+@media (max-width: 880px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-areas: "head" "rail" "sheet" "foot";
+  }
+  .rail {
+    position: static;
+  }
+}
+
+/* ── Masthead / wordmark ───────────────────────────────────────────────── */
+
+.masthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.4rem;
+}
+
+.wordmark {
+  margin: 0;
+  font: 400 clamp(2.2rem, 6.5vw, 3.8rem) / 0.82 var(--ui);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ember);
+  /* Departure Mono ships one weight, so the wordmark gets its weight from a
+     stroke rather than from synthetic bold, which smears a pixel face. */
+  -webkit-text-stroke: 0.035em currentColor;
+  paint-order: stroke fill;
+}
+.wordmark .bracket {
+  color: var(--line);
+}
+
+.tagline {
+  margin: 0 0 0.2rem;
+  font-family: var(--ui);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+/* ── Panel (the reusable frame) ────────────────────────────────────────── */
+
+.panel {
+  background: var(--paper-2);
+  border: 2px solid var(--line);
+}
+
+.panel > .panel__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 2px solid var(--line);
+  background: var(--paper-sunk);
+  font-family: var(--ui);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  color: var(--ember);
+}
+.panel__title .step {
+  color: var(--ink-soft);
+  margin-right: 0.5em;
+}
+.panel__body {
+  padding: 0.7rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ── Fields, wells, controls ───────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.label {
+  font-family: var(--ui);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.well,
+select,
+input[type="text"] {
+  appearance: none;
+  width: 100%;
+  font: 1rem var(--body);
+  color: var(--ink);
+  background: var(--paper-sunk);
+  border: 2px solid var(--line);
+  padding: 0.4rem 0.55rem;
+  box-shadow:
+    inset 1px 1px 0 rgba(36, 29, 20, 0.22),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.5);
+}
+
+select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ember) 50%),
+    linear-gradient(135deg, var(--ember) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px);
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 1.8rem;
+  cursor: pointer;
+}
+
+input::placeholder {
+  color: var(--faint);
+}
+
+select:disabled,
+input:disabled,
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+select option:disabled {
+  color: var(--faint);
+}
+
+:where(select, input, .btn):focus-visible {
+  outline: none;
+  box-shadow:
+    inset 1px 1px 0 rgba(36, 29, 20, 0.22),
+    0 0 0 2px var(--ember);
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+
+.btn {
+  font: 400 1rem/1 var(--ui);
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--paper);
+  background: var(--ember);
+  border: 2px solid var(--line);
+  padding: 0.5rem 0.8rem;
+  text-align: center;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset -1px -1px 0 rgba(36, 29, 20, 0.45);
+}
+.btn:hover:not(:disabled) {
+  background: var(--ember-2);
+}
+.btn:active:not(:disabled) {
+  box-shadow:
+    inset -1px -1px 0 rgba(255, 255, 255, 0.2),
+    inset 1px 1px 0 rgba(36, 29, 20, 0.5);
+}
+.btn.ghost {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+.btn.block {
+  width: 100%;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+.hint a {
+  color: var(--ember);
+  text-decoration: none;
+}
+.hint a:hover {
+  text-decoration: underline;
+}
+
+.status {
+  margin: 0;
+  font-family: var(--ui);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  min-height: 1.1em;
+}
+.status::before {
+  content: "› ";
+  color: var(--ember);
+}
+.status[data-kind="error"] {
+  color: var(--ember);
+}
+.status[data-kind="error"]::before {
+  content: "✕ ";
+}
+
+/* ── The character sheet canvas ────────────────────────────────────────── */
+
+.frame {
+  position: relative;
+  border: 2px solid var(--line);
+  background: var(--paper-2);
+  /* Fill the canvas cell (width) and grid row (height) so the sheet bottom
+     lines up with the rail's last panel. */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 22rem;
+  /* Collapse the sheet grid on the sheet's OWN width, not the viewport's — the
+     rail steals ~260px, so a viewport-based breakpoint keeps three columns long
+     after the sheet is too narrow for them. */
+  container: sheet / inline-size;
+}
+
+.sheet {
+  flex: 1;
+  padding: clamp(0.9rem, 2vw, 1.4rem);
+}
+
+/* Empty state */
+.sheet[data-state="empty"] {
+  display: grid;
+  place-items: center;
+  background-image: radial-gradient(var(--faint) 0.8px, transparent 1px);
+  background-size: 9px 9px;
+}
+.empty {
+  text-align: center;
+  max-width: 40ch;
+}
+.empty .glyph {
+  font-family: var(--ui);
+  font-size: clamp(3rem, 9vw, 5rem);
+  line-height: 1;
+  color: var(--faint);
+}
+.empty .say {
+  margin: 0.8rem 0 0;
+  font-family: var(--ui);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.empty .sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--faint);
+}
+
+/* Sheet header */
+.sheet-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+.sheet-name {
+  margin: 0;
+  font: 700 clamp(1.7rem, 4vw, 2.6rem) / 0.92 var(--display);
+  text-transform: uppercase;
+  color: var(--ember);
+}
+.sheet-sub-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+/* Headline stat line */
+.statline {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  margin: 0 0 0.6rem;
+  border: 2px solid var(--line);
+}
+.statline > div {
+  padding: 0.4rem 0.6rem;
+  border-right: 2px solid var(--line);
+}
+.statline > div:last-child {
+  border-right: 0;
+}
+.statline dt {
+  margin: 0;
+  font-family: var(--ui);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.statline dd {
+  margin: 0.05rem 0 0;
+  font-family: var(--ui);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Dense section grid ────────────────────────────────────────────────── */
+
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.6rem 0.9rem;
+  align-items: start;
+}
+
+/* The prose sections below the grid. On screen they stack, each keeping its own
+   two-column trait list; print turns the whole block into one newspaper flow. */
+.ability-flow {
+  margin-top: 0.6rem;
+}
+.ability-flow > .section + .section {
+  margin-top: 0.7rem;
+}
+.span-12 {
+  grid-column: span 12;
+}
+.span-8 {
+  grid-column: span 8;
+}
+.span-6 {
+  grid-column: span 6;
+}
+.span-4 {
+  grid-column: span 4;
+}
+@container sheet (max-width: 680px) {
+  /* Two-up: the stacks sit side by side; the wide gear table and prose sections
+     go full width. Shrink the stat tables so long ability names keep to their
+     cell instead of overlapping the score column. */
+  .sheet-grid > .stack {
+    grid-column: span 6;
+  }
+  .sheet-grid > .section {
+    grid-column: span 12;
+  }
+  .sheet table {
+    font-size: 0.82rem;
+  }
+  /* Six stat cells overflow in one row; wrap to 3-up. */
+  .statline {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .statline dd {
+    font-size: 1.3rem;
+  }
+  .statline > div {
+    border-bottom: 2px solid var(--line);
+  }
+  .statline > div:nth-child(3n) {
+    border-right: 0;
+  }
+  .statline > div:nth-last-child(-n + 3) {
+    border-bottom: 0;
+  }
+}
+@container sheet (max-width: 440px) {
+  /* One column: the stacks must beat the more-specific span-6 rule above. */
+  .sheet-grid > .stack,
+  .sheet-grid > .section {
+    grid-column: span 12;
+  }
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.section {
+  margin: 0;
+  min-width: 0;
+}
+.section > h3 {
+  margin: 0 0 0.4rem;
+  font: 400 0.85rem/1 var(--ui);
+  text-transform: uppercase;
+  color: var(--ember-2);
+}
+
+/* Tables (abilities, saves), runescapecn-style: bordered, tinted header bar,
+   row hover. Re-skinned to the light palette. */
+.sheet table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  border: 2px solid var(--line);
+  table-layout: fixed;
+}
+.sheet th,
+.sheet td {
+  text-align: left;
+  padding: 0.2rem 0.5rem;
+  border-bottom: 1px solid var(--line-soft);
+  overflow-wrap: anywhere;
+}
+.sheet thead th {
+  font-family: var(--ui);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--ember-2);
+  background: var(--paper-sunk);
+  border-bottom: 2px solid var(--line);
+}
+.sheet tbody tr:last-child td {
+  border-bottom: 0;
+}
+.sheet tbody tr:hover td {
+  background: rgba(36, 29, 20, 0.045);
+}
+.sheet .num {
+  text-align: right;
+  font-family: var(--ui);
+  font-variant-numeric: tabular-nums;
+}
+/* Numeric columns hold 2–3 glyphs; pin them narrow so the label column keeps
+   the remaining width. Without this, table-layout:fixed splits width evenly and
+   the label ("Intelligence" + prime marker) wraps while the numbers sit half
+   empty. */
+.sheet th.num,
+.sheet td.num {
+  /* Wide enough that the longest header ("Target") clears its cell padding
+     instead of touching the border. */
+  width: 3.6rem;
+}
+/* Ability/save labels are short words — never break them mid-character (that's
+   the "Intel/ligen/ce" overflow). Only the gear table, with long item names,
+   keeps the anywhere-break from the rule above. */
+.sheet table:has(.num) td,
+.sheet table:has(.num) th {
+  overflow-wrap: normal;
+}
+
+/* Badge (runescapecn-style, light): hard border + inset bevel, uppercase. */
+.badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-family: var(--ui);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper-sunk);
+  border: 2px solid var(--line);
+  padding: 0.08rem 0.4rem;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.45),
+    inset -1px -1px 0 rgba(36, 29, 20, 0.22);
+}
+.badge .bv {
+  color: var(--ember);
+  font-variant-numeric: tabular-nums;
+}
+.badge--accent {
+  color: var(--paper);
+  background: var(--ember);
+}
+.badge--accent .bv {
+  color: var(--paper);
+}
+.badge--soft {
+  border-color: var(--line-soft);
+  box-shadow: none;
+}
+
+/* Wrapping container for skill / language badges */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* Traits: two-column flow, full-width group headers */
+.trait-list {
+  columns: 2 17rem;
+  column-gap: 1.4rem;
+}
+.trait-list .trait-group {
+  column-span: all;
+  margin: 0.5rem 0 0.3rem;
+  font-family: var(--ui);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  color: var(--ember-2);
+}
+.trait-list .trait-group:first-child {
+  margin-top: 0;
+}
+.trait {
+  /* A long ability may flow across the column boundary so it doesn't jump whole
+     and leave the previous column half empty; its sub-points stay intact. */
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
+  line-height: 1.38;
+}
+.trait .trait-sub,
+.trait .statblock {
+  break-inside: avoid;
+}
+.trait .trait-subhead {
+  break-after: avoid;
+}
+/* A casting entry (spell/glamour) is short and self-contained — keep its name
+   with its description rather than splitting it across the column boundary. */
+.trait.cast {
+  break-inside: avoid;
+}
+.trait .tn {
+  font-family: var(--ui);
+  color: var(--ink);
+}
+/* Trait sub-structure, three visible levels below the section title:
+   1. trait name (.tn)      — bold ink, the entry heading
+   2. sub-heading           — ember, its own line, a named sub-ability
+   3. run-in label          — muted ink, subordinate to both
+   Sub-points nest under a sub-heading via .trait-nest's indent. */
+.trait .trait-sub {
+  display: block;
+  margin-top: 0.12rem;
+}
+.trait .sub-label {
+  font-family: var(--ui);
+  color: var(--ink);
+}
+.trait .trait-item {
+  padding-left: 0.9em;
+  position: relative;
+}
+.trait .trait-item::before {
+  content: "";
+  position: absolute;
+  left: 0.1em;
+  top: 0.5em;
+  width: 0.3em;
+  height: 0.3em;
+  background: var(--ember-2);
+}
+.trait .trait-subhead {
+  display: block;
+  margin-top: 0.3rem;
+  font-family: var(--ui);
+  color: var(--ink-soft);
+}
+/* Sub-points sit indented under the trait name; a sub-heading's own points
+   indent once more. */
+.trait .trait-body {
+  display: block;
+  padding-left: 0.8em;
+}
+.trait .trait-nest {
+  display: block;
+  padding-left: 0.8em;
+}
+/* An embedded creature stat block: a type line over a wrapping row of labelled
+   stats, boxed so it reads as a unit rather than run-on prose. */
+.trait .statblock {
+  margin: 0.3rem 0;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--line-soft);
+  background: var(--paper-sunk);
+}
+.trait .sb-type {
+  display: block;
+  font-family: var(--ui);
+  color: var(--ink);
+}
+.trait .sb-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.05rem 0.7rem;
+  margin-top: 0.15rem;
+}
+.trait .sb-stat {
+  color: var(--ink);
+  white-space: nowrap;
+}
+.trait .sb-stat .field-label {
+  margin-right: 0.2rem;
+}
+
+/* Spells + glamours: reuse the trait rhythm and the sheet's three type tokens
+   (trait body 0.92rem, trait-group 0.82rem, field-label 0.62rem) so each entry
+   reads as one hierarchy — no ad-hoc sizes. */
+/* Uppercase tradition/rank tag after a spell name, on the same line. */
+.cast .cast-tag {
+  font-family: var(--ui);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--ember-2);
+}
+/* Duration / Range line, at body size with micro-labels. */
+.cast .cast-stat {
+  display: block;
+  margin: 0.15rem 0;
+  color: var(--ink-soft);
+}
+.cast .cast-stat .field-label {
+  margin-right: 0.3rem;
+}
+.cast .cast-stat .field-label:not(:first-child) {
+  margin-left: 0.7rem;
+}
+.cast .cast-body {
+  display: block;
+}
+
+/* Compact key/value grid (persona, gear) */
+.kv {
+  display: grid;
+  gap: 0.1rem 0.8rem;
+  margin: 0;
+}
+.kv > div {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+  min-width: 0;
+}
+.kv dt {
+  font-family: var(--ui);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.kv dd {
+  margin: 0;
+  min-width: 0;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+/* In-cell tag (e.g. a prime-ability marker) */
+.field-label {
+  font-family: var(--ui);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  color: var(--ember-2);
+}
+
+/* ── Reveal: the sheet fills in ────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal > * {
+    opacity: 0;
+    transform: translateY(4px);
+    animation: fill 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+}
+@keyframes fill {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Colophon ──────────────────────────────────────────────────────────── */
+
+.colophon {
+  /* Positioned so it paints above the sticky rail, which would otherwise
+     intercept clicks on the left-hand credit links. */
+  position: relative;
+  z-index: 1;
+  margin-top: 0.3rem;
+  font-family: var(--ui);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem 1.5rem;
+  flex-wrap: wrap;
+}
+.colophon .credits {
+  max-width: 70ch;
+}
+.colophon a {
+  color: var(--ember);
+  text-decoration: none;
+}
+.colophon a:hover {
+  text-decoration: underline;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ── Print: the sheet only, nothing else ───────────────────────────────── */
+
+@media print {
+  @page {
+    margin: 1cm;
+  }
+  .masthead,
+  .rail,
+  .colophon {
+    display: none !important;
+  }
+  .shell {
+    display: block;
+    padding: 0;
+    margin: 0;
+    max-width: none;
+  }
+  .canvas {
+    display: block;
+  }
+  .frame {
+    border: none;
+    background: none;
+    min-height: 0;
+  }
+  .sheet {
+    padding: 0;
+  }
+  .sheet[data-state="empty"] {
+    display: none;
+  }
+  .badge {
+    background: none;
+  }
+  /* The fill-in animation must not leave content faded when printing. */
+  .reveal > * {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  /* Tighten the statline so it takes less vertical space. */
+  .statline dt {
+    font-size: 0.7rem;
+  }
+  .statline dd {
+    font-size: 1.2rem;
+  }
+  .statline > div {
+    padding: 0.2rem 0.4rem;
+  }
+
+  /* Two columns at the top: abilities/saves | skills/languages/persona,
+     then equipment full-width below — so the long gear table doesn't push
+     to a second page. */
+  .sheet-grid {
+    gap: 0.3rem 0.6rem;
+  }
+  .sheet-grid > .stack {
+    grid-column: span 6;
+  }
+  .sheet-grid > .section {
+    grid-column: span 12;
+  }
+
+  /* Compact tables. */
+  .sheet table {
+    font-size: 0.8rem;
+  }
+  .sheet th,
+  .sheet td {
+    padding: 0.1rem 0.3rem;
+  }
+  .section > h3 {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+  }
+  .stack {
+    gap: 0.3rem;
+  }
+
+  /* Traits: smaller font to fit. */
+  .trait {
+    font-size: 0.78rem;
+    line-height: 1.25;
+    margin-bottom: 0.3rem;
+  }
+
+  /* Page one holds the stat tables, physique, persona, and gear; the prose
+     sections begin on page two as one newspaper flow — down the left column,
+     then the right — instead of each section balancing its own columns. */
+  .ability-flow {
+    break-before: page;
+    column-count: 2;
+    column-gap: 0.6rem;
+  }
+  .ability-flow .trait-list {
+    columns: 1;
+  }
+  /* Keep the top stacks and stat blocks whole. A long structured ability may
+     flow across the column boundary so the column fills to the page bottom; its
+     sub-points, stat blocks, and casting entries stay whole (base rules). */
+  .stack,
+  .statblock {
+    break-inside: avoid;
+  }
+  .section > h3,
+  .trait-subhead {
+    break-after: avoid;
+  }
+}

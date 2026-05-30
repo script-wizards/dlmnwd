@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dlmnwd, a character generator</title>
+    <meta
+      name="description"
+      content="Roll a level-1 PC from your Player's Book PDF. An unofficial character generator that runs entirely in your browser."
+    />
+
+    <link rel="canonical" href="https://dlmnwd.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="dlmnwd — Unofficial Character Generator" />
+    <meta property="og:description" content="Roll a level-1 PC from your Player's Book PDF." />
+    <meta property="og:image" content="https://dlmnwd.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://dlmnwd.com/" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="dlmnwd — Unofficial Character Generator" />
+    <meta name="twitter:description" content="Roll a level-1 PC from your Player's Book PDF." />
+    <meta name="twitter:image" content="https://dlmnwd.com/og.png" />
+
+    <link rel="stylesheet" href="./app.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <h1 class="wordmark"><span class="bracket">[</span>dlmnwd<span class="bracket">]</span></h1>
+        <p class="tagline">Unofficial Character Generator</p>
+      </header>
+
+      <aside class="rail">
+        <section class="panel" aria-label="Player's Book">
+          <div class="panel__title">
+            <span><span class="step">I</span> Player's Book</span>
+          </div>
+          <div class="panel__body">
+            <input id="file" type="file" accept="application/pdf" hidden />
+            <button id="pick" type="button" class="btn block">Choose PDF</button>
+            <p class="hint">
+              Your PDF never leaves this browser. Use one you own. Don't have one?
+              <a href="https://necroticgnome.com/products/dolmenwood-players-book">Buy it here.</a>
+            </p>
+            <p id="status" class="status" role="status" aria-live="polite">
+              Awaiting your Player's Book.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Kindred and class">
+          <div class="panel__title">
+            <span><span class="step">II</span> Kindred &amp; Class</span>
+          </div>
+          <div class="panel__body">
+            <label class="field">
+              <span class="label">Kindred</span>
+              <select id="kindred" disabled></select>
+            </label>
+            <label class="field">
+              <span class="label">Class</span>
+              <select id="class" disabled></select>
+            </label>
+            <label class="field">
+              <span class="label">Alignment</span>
+              <select id="alignment" disabled>
+                <option value="Lawful">Lawful</option>
+                <option value="Neutral" selected>Neutral</option>
+                <option value="Chaotic">Chaotic</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Name">
+          <div class="panel__title">
+            <span><span class="step">III</span> Name</span>
+          </div>
+          <div class="panel__body">
+            <label class="field">
+              <span class="label">Name</span>
+              <input id="name" type="text" placeholder="rolled if left blank" disabled />
+            </label>
+            <label class="field">
+              <span class="label">Player</span>
+              <input id="player" type="text" placeholder="optional" disabled />
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Generate">
+          <div class="panel__title">
+            <span><span class="step">IV</span> Generate</span>
+          </div>
+          <div class="panel__body">
+            <button id="generate" type="button" class="btn block" disabled>Generate</button>
+            <button id="print" type="button" class="btn ghost block" hidden>Print</button>
+            <button id="download" type="button" class="btn ghost block" hidden>Download .md</button>
+          </div>
+        </section>
+      </aside>
+
+      <div class="canvas">
+        <div class="frame">
+          <article id="sheet" class="sheet" data-state="empty" aria-live="polite"></article>
+        </div>
+      </div>
+
+      <footer class="colophon">
+        <span class="credits">
+          Made by <a href="https://scriptwizards.org/">Script Wizards</a>. Type is
+          <a href="https://departuremono.com/">Departure Mono</a> by Helena Zhang and
+          <a href="https://velvetyne.fr/fonts/basteleur/">Basteleur</a> by Keussel, both under the
+          SIL Open Font License.
+        </span>
+        <span>
+          <a href="https://necroticgnome.com/pages/about-dolmenwood">Dolmenwood</a> ©
+          <a href="https://necroticgnome.com/">Necrotic Gnome</a>
+        </span>
+      </footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

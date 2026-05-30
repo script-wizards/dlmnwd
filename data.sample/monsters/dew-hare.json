@@ -1,0 +1,16 @@
+{
+  "id": "dew-hare",
+  "name": "Dew-Hare",
+  "ac": 13,
+  "hd": "1-1",
+  "attacks": "1 kick (1d4)",
+  "movement": "60'",
+  "saves": "D14 R15 H16 B17 S18",
+  "morale": 5,
+  "alignment": "Neutral",
+  "xp": 5,
+  "numberAppearing": "2d6",
+  "treasure": "None",
+  "special": ["Vanishes in a puff of mist if reduced to 0 hp (no body)"],
+  "notes": "Invented sample monster, not canon."
+}

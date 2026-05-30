@@ -1,0 +1,16 @@
+{
+  "id": "bramblewight",
+  "name": "Bramblewight",
+  "ac": 14,
+  "hd": "3",
+  "attacks": "2 claws (1d6)",
+  "movement": "30'",
+  "saves": "D12 R13 H14 B15 S16",
+  "morale": 8,
+  "alignment": "Chaotic",
+  "xp": 50,
+  "numberAppearing": "1d4",
+  "treasure": "None",
+  "special": ["Regenerates 1 hp/round within 10' of living wood", "Immune to charm and sleep"],
+  "notes": "Invented sample monster, not canon."
+}

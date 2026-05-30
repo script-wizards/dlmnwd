@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dlmnwd (mock)</title>
+    <link rel="stylesheet" href="./app.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <h1 class="wordmark">
+          <span class="bracket">[</span>Dolmenwood<span class="bracket">]</span>
+        </h1>
+        <p class="tagline">Unofficial Character Generator (mock)</p>
+      </header>
+
+      <aside class="rail">
+        <section class="panel" aria-label="Player's Book">
+          <div class="panel__title">
+            <span><span class="step">I</span> Player's Book</span>
+          </div>
+          <div class="panel__body">
+            <button type="button" class="btn block">Choose PDF</button>
+            <p class="hint">Your PDF never leaves this browser. Use one you own.</p>
+            <p class="status">Mock data loaded.</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Kindred and class">
+          <div class="panel__title">
+            <span><span class="step">II</span> Kindred &amp; Class</span>
+          </div>
+          <div class="panel__body">
+            <label class="field">
+              <span class="label">Kindred</span>
+              <select>
+                <option selected>Thornling</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="label">Class</span>
+              <select>
+                <option selected>Hedgewise</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Name">
+          <div class="panel__title">
+            <span><span class="step">III</span> Name</span>
+          </div>
+          <div class="panel__body">
+            <label class="field">
+              <span class="label">Name</span>
+              <input type="text" value="Pomella Quill" />
+            </label>
+            <label class="field">
+              <span class="label">Player</span>
+              <input type="text" value="Sam" />
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Generate">
+          <div class="panel__title">
+            <span><span class="step">IV</span> Generate</span>
+          </div>
+          <div class="panel__body">
+            <button type="button" class="btn block">Generate</button>
+            <button type="button" class="btn ghost block">Download .md</button>
+          </div>
+        </section>
+      </aside>
+
+      <div class="canvas">
+        <div class="frame">
+          <article id="sheet" class="sheet"></article>
+        </div>
+      </div>
+
+      <footer class="colophon">
+        <span class="credits">
+          Made by <a href="https://scriptwizards.org/">Script Wizards</a>. Type is
+          <a href="https://departuremono.com/">Departure Mono</a> by Helena Zhang and
+          <a href="https://velvetyne.fr/fonts/basteleur/">Basteleur</a> by Keussel, both under the
+          SIL Open Font License.
+        </span>
+        <span>
+          <a href="https://necroticgnome.com/pages/about-dolmenwood">Dolmenwood</a> ©
+          <a href="https://necroticgnome.com/">Necrotic Gnome</a>
+        </span>
+      </footer>
+    </main>
+    <script type="module" src="./mock.ts"></script>
+  </body>
+</html>

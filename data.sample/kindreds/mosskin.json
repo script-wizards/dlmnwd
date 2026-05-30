@@ -1,0 +1,15 @@
+{
+  "id": "mosskin",
+  "name": "Mosskin",
+  "nativeLanguages": ["Sample-Tongue"],
+  "names": {
+    "first": ["Damp", "Verdy", "Fenwick", "Spore"],
+    "surname": ["Greencreep", "Softfoot", "Drizzlecoat"]
+  },
+  "persona": {
+    "demeanour": ["Placid", "Brooding", "Curious"],
+    "face": ["Moss-furred", "Dripping", "Mushroom-capped"],
+    "speech": ["Slow", "Murmuring"],
+    "desire": ["To never dry out", "To find the old spring"]
+  }
+}

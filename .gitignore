@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+dist/
+
+# Licensed game content. Bring your own. NEVER commit these.
+# Drop your PDFs in ./books/. The whole folder is ignored.
+books/
+data/
+*.pdf
+*.epub
+
+# Local PDF path config + derived extraction/index cache (machine-local, never shipped)
+dw.config.json
+.dw-cache/
+*.db
+*.db-wal
+*.db-shm
+
+# Session/runtime state
+dw-session.json
+
+# Playwright MCP scratch output
+.playwright-mcp/
+og-card.png
+
+# OS / editor
+.DS_Store
+*.swp

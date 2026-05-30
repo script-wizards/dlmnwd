@@ -1,0 +1,10 @@
+{
+  "region": "sample-wood",
+  "die": "1d6",
+  "results": [
+    { "roll": "1-2", "monster": "Bramblewight (1d4)", "note": "foraging" },
+    { "roll": "3-4", "monster": "Dew-Hare (2d6)" },
+    { "roll": "5", "monster": "Thornling band (1d6)", "note": "suspicious" },
+    { "roll": "6", "monster": "Nothing, but strange noises nearby" }
+  ]
+}

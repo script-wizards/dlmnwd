@@ -1,0 +1,8 @@
+#!/bin/sh
+# Format and lint before every commit. Formatting is applied and the
+# already-staged files are re-staged; linting blocks the commit on failure.
+set -e
+
+bun run fmt
+git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 git add --
+bun run lint

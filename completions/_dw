@@ -1,0 +1,49 @@
+#compdef dw
+# zsh completion for the dw CLI.
+#
+# Install: add the completions dir to your fpath before compinit, e.g. in ~/.zshrc:
+#   fpath=(/path/to/dlmnwd/completions $fpath)
+#   autoload -Uz compinit && compinit
+# Names are completed from the live index via `dw list`.
+
+_dw() {
+  local -a subcmds
+  subcmds=(
+    'roll:Roll dice (e.g. 3d6+2)'
+    'react:Reaction roll (2d6)'
+    'morale:Morale check vs ML'
+    'wander:Wandering-monster check'
+    'npc:Random NPC from a kindred'
+    'mon:Monster stat block'
+    'hex:Keyed hex entry'
+    'build:Parse PDFs into the index'
+    'search:Full-text search'
+    'spell:Spell entry'
+    'list:Print names in a category'
+    'new:Generate a level-1 PC sheet'
+    'help:Show help'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe 'dw command' subcmds
+    return
+  fi
+
+  local cmd=${words[2]}
+  case $cmd in
+    mon)   _values 'monster' ${(f)"$(dw list monsters 2>/dev/null)"} ;;
+    spell) _values 'spell'   ${(f)"$(dw list spells 2>/dev/null)"} ;;
+    hex)   _values 'hex'     ${(f)"$(dw list hexes 2>/dev/null | awk '{print $1}')"} ;;
+    npc)   _values 'kindred' ${(f)"$(dw list kindreds 2>/dev/null)"} ;;
+    list)  _values 'category' monsters spells hexes kindreds classes ;;
+    new)
+      if (( CURRENT == 3 )); then
+        _values 'kindred' random ${(f)"$(dw list kindreds 2>/dev/null)"}
+      elif (( CURRENT == 4 )); then
+        _values 'class' random ${(f)"$(dw list classes 2>/dev/null)"}
+      fi
+      ;;
+  esac
+}
+
+_dw "$@"

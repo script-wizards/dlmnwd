@@ -1,0 +1,17 @@
+{
+  "id": "thornling",
+  "name": "Thornling",
+  "nativeLanguages": ["Sample-Tongue", "Bramblespeak"],
+  "names": {
+    "first": ["Prick", "Burr", "Sloe", "Haw", "Nettle", "Bryony"],
+    "surname": ["Thistledown", "Sharpwhistle", "Bramblecoat", "Dewclaw"]
+  },
+  "persona": {
+    "demeanour": ["Prickly", "Aloof", "Overfamiliar", "Sly"],
+    "face": ["Thorn-scarred", "Wide-eyed", "Lichen-bearded"],
+    "dress": ["Burr-cloak", "Woven bark", "Stolen finery"],
+    "speech": ["Whispering", "Rhyming", "Blunt"],
+    "belief": ["The bog remembers", "Iron is a lie"],
+    "desire": ["A warm hearth", "Revenge on the gardener"]
+  }
+}

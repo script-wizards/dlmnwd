@@ -1,22 +1,15 @@
 /* Dolmenwood tools: a "textmode" character sheet. Type system follows the
-   pixel-terminal look: Departure Mono does the workhorse reading, and Basteleur
-   is reserved for one display moment, the character name. The light palette is a
-   light inversion of that stone/gold: warm parchment, ink, ember. The dark
-   palette is the Script Wizards black/orange scheme (scriptwizards.org). */
+   pixel-terminal look: Departure Mono for everything, hierarchy from size,
+   weight, and case alone. The light palette is a light inversion of that
+   stone/gold: warm parchment, ink, ember. The dark palette is the Script
+   Wizards black/orange scheme (scriptwizards.org). */
 
-/* Both faces are SIL Open Font License 1.1. Licence text sits beside them in
-   web/fonts/, and NOTICE.md records the scope. Basteleur carries a Reserved Font
-   Name, so the family is never renamed or re-released under another name. */
+/* Departure Mono is SIL Open Font License 1.1. Licence text sits beside it in
+   web/fonts/, and NOTICE.md records the scope. */
 @font-face {
   font-family: "Departure Mono";
   src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
   font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Basteleur";
-  src: url("./fonts/Basteleur-Bold.woff2") format("woff2");
-  font-weight: 700;
   font-display: swap;
 }
 
@@ -40,7 +33,7 @@
   --sheen: 255, 255, 255; /* bevel highlight rgb */
   --row-hover: rgba(36, 29, 20, 0.045); /* table row hover tint */
 
-  --display: "Basteleur", Georgia, serif; /* character name only */
+  --display: "Departure Mono", ui-monospace, monospace; /* character name */
   --ui: "Departure Mono", ui-monospace, monospace; /* titles, labels, numbers */
   --body: "Departure Mono", ui-monospace, monospace; /* reading text */
 
@@ -427,9 +420,12 @@ select option:disabled {
 }
 .sheet-name {
   margin: 0;
-  font: 700 clamp(1.7rem, 4vw, 2.6rem) / 0.92 var(--display);
+  font: 400 clamp(1.7rem, 4vw, 2.6rem) / 0.92 var(--display);
   text-transform: uppercase;
   color: var(--ember);
+  /* Same stroke trick as the wordmark: no synthetic bold on a pixel face. */
+  -webkit-text-stroke: 0.035em currentColor;
+  paint-order: stroke fill;
 }
 .sheet-sub-row {
   display: flex;

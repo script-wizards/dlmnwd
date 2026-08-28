@@ -15,9 +15,9 @@ not embed setting-specific strings; kindreds and their mechanics are _discovered
 from the book_ (headers like `X NAMES`, `Kindred Type`), never hardcoded. (The class
 list in `src/parse/class.ts` is a known fixed list, by contrast.)
 
-The repo is public (MIT for its own code). The bundled fonts (`web/fonts/`: Departure
-Mono, Basteleur) are SIL OFL 1.1 with their licence texts alongside; `NOTICE.md`
-records the scope. Never vendor an asset whose licence forbids redistribution.
+The repo is public (MIT for its own code). The bundled font (`web/fonts/`: Departure
+Mono) is SIL OFL 1.1 with its licence text alongside; `NOTICE.md` records the
+scope. Never vendor an asset whose licence forbids redistribution.
 
 ## Commands
 
@@ -163,8 +163,8 @@ reason to exist; never add an upload affordance.
   prefilled fixture for iterating on the UI without a PDF). Keep sheet.ts free of
   parsing and file I/O.
 - `web/index.html` is the entry; `web/app.css` is the implemented visual system
-  (a light-inverted "textmode" character sheet using Departure Mono, with Basteleur for
-  display). `DESIGN.md` and `PRODUCT.md` describe the design/product intent as context.
+  (a light-inverted "textmode" character sheet set entirely in Departure Mono).
+  `DESIGN.md` and `PRODUCT.md` describe the design/product intent as context.
 - `scripts/build-single.ts` inlines the bundled JS/CSS/fonts into one self-contained
   HTML after `web:build`; it throws if any external asset survives.
 - Deploys to Cloudflare Pages as the static `dist/` build; bundled at dlmnwd.com with an

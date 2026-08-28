@@ -11,15 +11,6 @@ Departure Mono, by Helena Zhang. SIL Open Font License 1.1, copied verbatim to
 
 Upstream: https://departuremono.com
 
-## web/fonts/Basteleur-Bold.woff2
-
-Basteleur, by Keussel, published by Velvetyne Type Foundry. SIL Open Font
-License 1.1, copied verbatim to `web/fonts/Basteleur-OFL.txt`. Basteleur carries
-a Reserved Font Name, so the family is never renamed or re-released under
-another name.
-
-Upstream: https://velvetyne.fr/fonts/basteleur
-
 ## Dolmenwood
 
 [Dolmenwood](https://necroticgnome.com/pages/about-dolmenwood) is © [Necrotic

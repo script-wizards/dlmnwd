@@ -199,9 +199,8 @@ for fuller Hoard/special coverage; `treasure`.
 
 Code: MIT (see `LICENSE`). Game data is yours and not covered here.
 
-Fonts: [Departure Mono](https://departuremono.com/) by Helena Zhang and
-[Basteleur](https://velvetyne.fr/fonts/basteleur/) by Keussel, both under the SIL
-Open Font License 1.1, bundled in `web/fonts/` with their licence texts. See
+Font: [Departure Mono](https://departuremono.com/) by Helena Zhang, under the SIL
+Open Font License 1.1, bundled in `web/fonts/` with its licence text. See
 [`NOTICE.md`](NOTICE.md) for the scope.
 
 The web app deploys to Cloudflare Pages as a static build (`bun run web:build` → `dist/`).

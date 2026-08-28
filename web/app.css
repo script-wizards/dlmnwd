@@ -1,21 +1,15 @@
-/* Dolmenwood tools: a light-mode "textmode" character sheet. Type system follows
-   the pixel-terminal look: Departure Mono does the workhorse reading, and Basteleur
-   is reserved for one display moment, the character name. Palette is a light
-   inversion of that stone/gold: warm parchment, ink, ember. */
+/* Dolmenwood tools: a "textmode" character sheet. Type system follows the
+   pixel-terminal look: Departure Mono for everything, hierarchy from size,
+   weight, and case alone. The light palette is a light inversion of that
+   stone/gold: warm parchment, ink, ember. The dark palette is the Script
+   Wizards black/orange scheme (scriptwizards.org). */
 
-/* Both faces are SIL Open Font License 1.1. Licence text sits beside them in
-   web/fonts/, and NOTICE.md records the scope. Basteleur carries a Reserved Font
-   Name, so the family is never renamed or re-released under another name. */
+/* Departure Mono is SIL Open Font License 1.1. Licence text sits beside it in
+   web/fonts/, and NOTICE.md records the scope. */
 @font-face {
   font-family: "Departure Mono";
   src: url("./fonts/DepartureMono-Regular.woff2") format("woff2");
   font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Basteleur";
-  src: url("./fonts/Basteleur-Bold.woff2") format("woff2");
-  font-weight: 700;
   font-display: swap;
 }
 
@@ -30,15 +24,60 @@
   --ember: #cf3a26; /* primary accent: red */
   --ember-2: #d7642f; /* secondary accent: orange */
   --moss: #5f6b34; /* tertiary glyph accent: wood green */
+  --accent-ink: #f1e7cf; /* text on accent fills */
 
   --line: #8a7350; /* frame borders, softened warm sepia */
   --line-soft: #d3c39c; /* inner hairlines */
 
-  --display: "Basteleur", Georgia, serif; /* character name only */
+  --shade: 36, 29, 20; /* bevel shadow rgb */
+  --sheen: 255, 255, 255; /* bevel highlight rgb */
+  --row-hover: rgba(36, 29, 20, 0.045); /* table row hover tint */
+
+  --display: "Departure Mono", ui-monospace, monospace; /* character name */
   --ui: "Departure Mono", ui-monospace, monospace; /* titles, labels, numbers */
   --body: "Departure Mono", ui-monospace, monospace; /* reading text */
 
   color-scheme: light;
+}
+
+/* Dark: the Script Wizards black/orange scheme. The :not guard lets the OS
+   preference apply until the user picks a theme; the [data-theme] blocks make
+   a manual choice win in both directions. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111111;
+    --paper-2: #1a1a1a;
+    --paper-sunk: #0d0d0d;
+    --ink: #ffffff;
+    --ink-soft: #c4c4c4;
+    --faint: #555555;
+    --ember: #ffa227;
+    --ember-2: #d98d2c;
+    --moss: #8b9a55;
+    --accent-ink: #1c1b19;
+    --line: #3d3d3d;
+    --line-soft: #2a2a2a;
+    --shade: 0, 0, 0;
+    --row-hover: rgba(255, 255, 255, 0.06);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111111;
+  --paper-2: #1a1a1a;
+  --paper-sunk: #0d0d0d;
+  --ink: #ffffff;
+  --ink-soft: #c4c4c4;
+  --faint: #555555;
+  --ember: #ffa227;
+  --ember-2: #d98d2c;
+  --moss: #8b9a55;
+  --accent-ink: #1c1b19;
+  --line: #3d3d3d;
+  --line-soft: #2a2a2a;
+  --shade: 0, 0, 0;
+  --row-hover: rgba(255, 255, 255, 0.06);
+  color-scheme: dark;
 }
 
 * {
@@ -129,6 +168,13 @@ body {
   color: var(--line);
 }
 
+.masthead__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
 .tagline {
   margin: 0 0 0.2rem;
   font-family: var(--ui);
@@ -136,6 +182,19 @@ body {
   text-transform: uppercase;
   color: var(--ink-soft);
   text-align: right;
+}
+
+.theme-toggle {
+  font: 400 0.8rem/1 var(--ui);
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--ink-soft);
+  background: none;
+  border: 2px solid var(--line);
+  padding: 0.3rem 0.5rem;
+}
+.theme-toggle:hover {
+  color: var(--ember);
 }
 
 /* ── Panel (the reusable frame) ────────────────────────────────────────── */
@@ -194,8 +253,8 @@ input[type="text"] {
   border: 2px solid var(--line);
   padding: 0.4rem 0.55rem;
   box-shadow:
-    inset 1px 1px 0 rgba(36, 29, 20, 0.22),
-    inset -1px -1px 0 rgba(255, 255, 255, 0.5);
+    inset 1px 1px 0 rgba(var(--shade), 0.22),
+    inset -1px -1px 0 rgba(var(--sheen), 0.5);
 }
 
 select {
@@ -227,10 +286,10 @@ select option:disabled {
   color: var(--faint);
 }
 
-:where(select, input, .btn):focus-visible {
+:where(select, input, .btn, .theme-toggle):focus-visible {
   outline: none;
   box-shadow:
-    inset 1px 1px 0 rgba(36, 29, 20, 0.22),
+    inset 1px 1px 0 rgba(var(--shade), 0.22),
     0 0 0 2px var(--ember);
 }
 
@@ -240,22 +299,22 @@ select option:disabled {
   font: 400 1rem/1 var(--ui);
   text-transform: uppercase;
   cursor: pointer;
-  color: var(--paper);
+  color: var(--accent-ink);
   background: var(--ember);
   border: 2px solid var(--line);
   padding: 0.5rem 0.8rem;
   text-align: center;
   box-shadow:
-    inset 1px 1px 0 rgba(255, 255, 255, 0.35),
-    inset -1px -1px 0 rgba(36, 29, 20, 0.45);
+    inset 1px 1px 0 rgba(var(--sheen), 0.35),
+    inset -1px -1px 0 rgba(var(--shade), 0.45);
 }
 .btn:hover:not(:disabled) {
   background: var(--ember-2);
 }
 .btn:active:not(:disabled) {
   box-shadow:
-    inset -1px -1px 0 rgba(255, 255, 255, 0.2),
-    inset 1px 1px 0 rgba(36, 29, 20, 0.5);
+    inset -1px -1px 0 rgba(var(--sheen), 0.2),
+    inset 1px 1px 0 rgba(var(--shade), 0.5);
 }
 .btn.ghost {
   color: var(--ink);
@@ -361,9 +420,12 @@ select option:disabled {
 }
 .sheet-name {
   margin: 0;
-  font: 700 clamp(1.7rem, 4vw, 2.6rem) / 0.92 var(--display);
+  font: 400 clamp(1.7rem, 4vw, 2.6rem) / 0.92 var(--display);
   text-transform: uppercase;
   color: var(--ember);
+  /* Same stroke trick as the wordmark: no synthetic bold on a pixel face. */
+  -webkit-text-stroke: 0.035em currentColor;
+  paint-order: stroke fill;
 }
 .sheet-sub-row {
   display: flex;
@@ -516,7 +578,7 @@ select option:disabled {
   border-bottom: 0;
 }
 .sheet tbody tr:hover td {
-  background: rgba(36, 29, 20, 0.045);
+  background: var(--row-hover);
 }
 .sheet .num {
   text-align: right;
@@ -554,19 +616,19 @@ select option:disabled {
   border: 2px solid var(--line);
   padding: 0.08rem 0.4rem;
   box-shadow:
-    inset 1px 1px 0 rgba(255, 255, 255, 0.45),
-    inset -1px -1px 0 rgba(36, 29, 20, 0.22);
+    inset 1px 1px 0 rgba(var(--sheen), 0.45),
+    inset -1px -1px 0 rgba(var(--shade), 0.22);
 }
 .badge .bv {
   color: var(--ember);
   font-variant-numeric: tabular-nums;
 }
 .badge--accent {
-  color: var(--paper);
+  color: var(--accent-ink);
   background: var(--ember);
 }
 .badge--accent .bv {
-  color: var(--paper);
+  color: var(--accent-ink);
 }
 .badge--soft {
   border-color: var(--line-soft);
@@ -804,6 +866,25 @@ select option:disabled {
 @media print {
   @page {
     margin: 1cm;
+  }
+  /* Paper is paper: print always renders the light palette, whatever theme is
+     active on screen. Ties the dark selectors on specificity and wins on order. */
+  :root:not([data-theme="light"]) {
+    --paper: #f1e7cf;
+    --paper-2: #f6efdb;
+    --paper-sunk: #e7dabb;
+    --ink: #241d14;
+    --ink-soft: #6f6147;
+    --faint: #c3b48f;
+    --ember: #cf3a26;
+    --ember-2: #d7642f;
+    --moss: #5f6b34;
+    --accent-ink: #f1e7cf;
+    --line: #8a7350;
+    --line-soft: #d3c39c;
+    --shade: 36, 29, 20;
+    --row-hover: rgba(36, 29, 20, 0.045);
+    color-scheme: light;
   }
   .masthead,
   .rail,

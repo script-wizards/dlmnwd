@@ -24,13 +24,26 @@
     <meta name="twitter:description" content="Roll a level-1 PC from your Player's Book PDF." />
     <meta name="twitter:image" content="https://dlmnwd.com/og.png" />
 
+    <!-- Applied before first paint so a stored theme choice doesn't flash. -->
+    <script>
+      try {
+        const t = localStorage.getItem("theme");
+        if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+
     <link rel="stylesheet" href="./app.css" />
   </head>
   <body>
     <main class="shell">
       <header class="masthead">
         <h1 class="wordmark"><span class="bracket">[</span>dlmnwd<span class="bracket">]</span></h1>
-        <p class="tagline">Unofficial Character Generator</p>
+        <div class="masthead__side">
+          <p class="tagline">Unofficial Character Generator</p>
+          <button id="theme" type="button" class="theme-toggle" aria-label="Color theme: auto">
+            theme:auto
+          </button>
+        </div>
       </header>
 
       <aside class="rail">
@@ -113,9 +126,7 @@
         <span class="credits">
           Made by <a href="https://scriptwizards.org/">Script Wizards</a>. Source on
           <a href="https://github.com/script-wizards/dlmnwd">GitHub</a>. Type is
-          <a href="https://departuremono.com/">Departure Mono</a> by Helena Zhang and
-          <a href="https://velvetyne.fr/fonts/basteleur/">Basteleur</a> by Keussel, both under the
-          SIL Open Font License.
+          <a href="https://departuremono.com/">Departure Mono</a> by Helena Zhang.
         </span>
         <span>
           <a href="https://necroticgnome.com/pages/about-dolmenwood">Dolmenwood</a> ©

@@ -202,6 +202,32 @@ generateBtn.addEventListener("click", () => {
 
 printBtn.addEventListener("click", () => window.print());
 
+// ── theme ──────────────────────────────────────────────────────────────────
+// The head script in index.html applies the stored choice before first paint;
+// this only cycles auto → dark → light and keeps the control's label in sync.
+const themeBtn = $<HTMLButtonElement>("theme");
+type Theme = "auto" | "dark" | "light";
+const nextTheme: Record<Theme, Theme> = { auto: "dark", dark: "light", light: "auto" };
+
+function currentTheme(): Theme {
+  const t = document.documentElement.dataset.theme;
+  return t === "dark" || t === "light" ? t : "auto";
+}
+
+function applyTheme(theme: Theme): void {
+  if (theme === "auto") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+  themeBtn.textContent = `theme:${theme}`;
+  themeBtn.setAttribute("aria-label", `Color theme: ${theme}`);
+  try {
+    if (theme === "auto") localStorage.removeItem("theme");
+    else localStorage.setItem("theme", theme);
+  } catch {}
+}
+
+applyTheme(currentTheme());
+themeBtn.addEventListener("click", () => applyTheme(nextTheme[currentTheme()]));
+
 downloadBtn.addEventListener("click", () => {
   if (!lastMarkdown) return;
   const safe = lastName.replace(/[^\w-]+/g, "_").replace(/^_+|_+$/g, "") || "character";

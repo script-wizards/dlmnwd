@@ -61,6 +61,26 @@ rhythm; thin rules as section dividers rather than boxes. Responsive: controls
 wrap to stacked on narrow screens; sheet tables stay legible with horizontal
 scroll only as a last resort.
 
+## Dark theme
+
+The Script Wizards black/orange scheme (sampled from the scriptwizards.org
+homepage), implemented in `web/app.css` purely as token overrides on the light
+"textmode" system. Auto via `prefers-color-scheme` (guarded by
+`:root:not([data-theme="light"])`), with explicit `:root[data-theme="dark"]`
+overrides so the masthead toggle (auto/dark/light, persisted to localStorage)
+wins in both directions. Print always re-asserts the light palette.
+
+- `--paper` `#111111` ground; `--paper-2` `#1a1a1a` panel fill; `--paper-sunk`
+  `#0d0d0d` sunken wells and table header bars.
+- `--ink` `#ffffff` body text (18.9:1 on ground); `--ink-soft` `#c4c4c4` muted
+  (10.8:1); `--faint` `#555555` hairlines/placeholder.
+- `--ember` `#ffa227` the accent orange: wordmark, headings, filled controls.
+  Never body text. `--accent-ink` `#1c1b19` is the text on orange fills.
+  `--ember-2` `#d98d2c` secondary accent (7.0:1); `--moss` `#8b9a55`.
+- `--line` `#3d3d3d` frame borders; `--line-soft` `#2a2a2a` inner hairlines.
+- `--shade` `0, 0, 0` bevel shadow rgb; `--row-hover`
+  `rgba(255, 255, 255, 0.06)` lightens instead of darkens.
+
 ## Motion
 
 Quiet and intentional. On generate, the sheet sections rise+fade on a short

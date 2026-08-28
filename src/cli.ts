@@ -10,6 +10,7 @@ import { cmdReact } from "./commands/react.ts";
 import { cmdRoll } from "./commands/roll.ts";
 import { cmdSearch } from "./commands/search.ts";
 import { cmdSpell } from "./commands/spell.ts";
+import { cmdTurn } from "./commands/turn.ts";
 import { cmdWander } from "./commands/wander.ts";
 
 const HELP = `dw: Dolmenwood GM tools
@@ -22,6 +23,9 @@ Rolling & procedures
   morale <ML> [mod]    Morale check (2d6 vs morale score)
   wander [region]      Wandering-monster check; rolls the encounter if it hits
                          --chance=N   in-6 chance (default 1)
+  turn [n]             Dungeon-turn tracker: advance n turns (10 min each),
+                         tick tracked durations, remind of wandering checks
+                         track <name> <dur> | status | check-every <n> | end
 
 Lookups (read your ./data; see README)
   npc <kindred>        Random NPC: name + persona
@@ -49,6 +53,7 @@ const commands: Record<string, (a: string[]) => void> = {
   react: cmdReact,
   morale: cmdMorale,
   wander: cmdWander,
+  turn: cmdTurn,
   npc: cmdNpc,
   mon: cmdMon,
   hex: cmdHex,

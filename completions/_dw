@@ -13,6 +13,7 @@ _dw() {
     'react:Reaction roll (2d6)'
     'morale:Morale check vs ML'
     'wander:Wandering-monster check'
+    'turn:Dungeon-turn tracker'
     'npc:Random NPC from a kindred'
     'mon:Monster stat block'
     'hex:Keyed hex entry'
@@ -36,6 +37,15 @@ _dw() {
     hex)   _values 'hex'     ${(f)"$(dw list hexes 2>/dev/null | awk '{print $1}')"} ;;
     npc)   _values 'kindred' ${(f)"$(dw list kindreds 2>/dev/null)"} ;;
     list)  _values 'category' monsters spells hexes kindreds classes ;;
+    turn)
+      if (( CURRENT == 3 )); then
+        _values 'turn subcommand' \
+          'track:track a light or spell duration' \
+          'status:current turn and tracked durations' \
+          'check-every:wandering-check cadence' \
+          'end:end the session'
+      fi
+      ;;
     new)
       if (( CURRENT == 3 )); then
         _values 'kindred' random ${(f)"$(dw list kindreds 2>/dev/null)"}

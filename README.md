@@ -7,6 +7,7 @@ mid-session: dice procedures, NPC improv, and stat-block or hex lookups.
 ```
 dw react                 # 2d6 reaction roll, interpreted
 dw morale 8              # morale check vs ML 8
+dw init                  # side-based initiative, 1d6 per side, ties rerolled
 dw wander sample-wood    # wandering-monster check + encounter roll
 dw turn                  # advance a dungeon turn: clock, lights, spells
 dw npc thornling         # random NPC: name + persona
@@ -149,8 +150,13 @@ install). A missing or unreadable state file starts a fresh session with a note.
 
 ## Status
 
-Working: `roll`, `react`, `morale`, `wander`, `turn`, `npc`, `mon`, `hex`,
-`build`, `search`, `spell`, `new`.
+Working: `roll`, `react`, `morale`, `init`, `wander`, `turn`, `npc`, `mon`,
+`hex`, `build`, `search`, `spell`, `new`.
+
+`dw init` rolls side-based initiative: 1d6 per side (default Party vs Enemies,
+or name your own with `dw init goblins party wolves`), highest acts first, ties
+rerolled until broken. `-r`/`--rounds N` rolls several rounds at once, since
+initiative is rerolled every round. Nothing is tracked; it rolls and prints.
 
 ```sh
 dw new <kindred> <class> --name="Pip Quickfoot" --player=Sam --out=PCs/Pip.md
@@ -187,7 +193,7 @@ non-standard format (e.g. Sample Keep) resolve by name even without a
 keyed wilderness entry.
 
 Roadmap: kindred/class trait names into `dw new`; reflow two-column monster pages
-for fuller Hoard/special coverage; `treasure`; `init`.
+for fuller Hoard/special coverage; `treasure`.
 
 ## License
 

@@ -8,6 +8,7 @@ mid-session: dice procedures, NPC improv, and stat-block or hex lookups.
 dw react                 # 2d6 reaction roll, interpreted
 dw morale 8              # morale check vs ML 8
 dw wander sample-wood    # wandering-monster check + encounter roll
+dw turn                  # advance a dungeon turn: clock, lights, spells
 dw npc thornling         # random NPC: name + persona
 dw mon bramble           # monster stat block (fuzzy match)
 dw hex 0101              # keyed hex entry
@@ -129,10 +130,27 @@ committed fallback). The layout and JSON shapes live in
 [`data.sample/README.md`](data.sample/README.md) and are typed in
 [`src/schema.ts`](src/schema.ts).
 
+## Dungeon turns
+
+`dw turn` keeps the dungeon clock: a turn is 10 minutes. Name whatever you want
+tracked (a torch, a spell) and give its duration in turns, minutes, or hours.
+
+```sh
+dw turn track torch 1h        # track anything by name (durations: 6, 30m, 1h)
+dw turn                       # advance one turn; warns on expiries + wandering checks
+dw turn 3                     # advance three turns
+dw turn status                # elapsed time and everything tracked
+dw turn check-every 3         # wandering-check cadence (default every 2 turns)
+dw turn end                   # end the session and clear state
+```
+
+State survives between invocations in `dw-session.json` (gitignored, next to the
+install). A missing or unreadable state file starts a fresh session with a note.
+
 ## Status
 
-Working: `roll`, `react`, `morale`, `wander`, `npc`, `mon`, `hex`, `build`,
-`search`, `spell`, `new`.
+Working: `roll`, `react`, `morale`, `wander`, `turn`, `npc`, `mon`, `hex`,
+`build`, `search`, `spell`, `new`.
 
 ```sh
 dw new <kindred> <class> --name="Pip Quickfoot" --player=Sam --out=PCs/Pip.md
@@ -169,8 +187,7 @@ non-standard format (e.g. Sample Keep) resolve by name even without a
 keyed wilderness entry.
 
 Roadmap: kindred/class trait names into `dw new`; reflow two-column monster pages
-for fuller Hoard/special coverage; `turn`, a dungeon-turn tracker for light and
-spell durations; `treasure`; `init`.
+for fuller Hoard/special coverage; `treasure`; `init`.
 
 ## License
 

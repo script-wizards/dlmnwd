@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { cmdBuild } from "./commands/build.ts";
 import { cmdHex } from "./commands/hex.ts";
+import { cmdInit } from "./commands/init.ts";
 import { cmdList } from "./commands/list.ts";
 import { cmdMon } from "./commands/mon.ts";
 import { cmdMorale } from "./commands/morale.ts";
@@ -21,6 +22,8 @@ Rolling & procedures
   roll <expr>          Roll dice, e.g. dw roll 3d6+2   (default 1d20)
   react [mod]          Reaction roll (2d6) with interpretation
   morale <ML> [mod]    Morale check (2d6 vs morale score)
+  init [sides…]        Side-based initiative (1d6 per side; default Party vs Enemies)
+                         -r/--rounds N  roll N rounds at once
   wander [region]      Wandering-monster check; rolls the encounter if it hits
                          --chance=N   in-6 chance (default 1)
   turn [n]             Dungeon-turn tracker: advance n turns (10 min each),
@@ -52,6 +55,7 @@ const commands: Record<string, (a: string[]) => void> = {
   roll: cmdRoll,
   react: cmdReact,
   morale: cmdMorale,
+  init: cmdInit,
   wander: cmdWander,
   turn: cmdTurn,
   npc: cmdNpc,

@@ -12,6 +12,7 @@ _dw() {
     'roll:Roll dice (e.g. 3d6+2)'
     'react:Reaction roll (2d6)'
     'morale:Morale check vs ML'
+    'init:Side-based initiative (1d6 per side)'
     'wander:Wandering-monster check'
     'turn:Dungeon-turn tracker'
     'npc:Random NPC from a kindred'

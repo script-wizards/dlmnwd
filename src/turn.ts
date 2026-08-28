@@ -1,9 +1,10 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
-// Anchored to the repo root (like pdf/config.ts) so the session follows the
-// install, not the invocation directory. Gitignored as dw-session.json.
-const REPO_ROOT = join(import.meta.dir, "..");
+// Same machine-local home as dw.db and the extraction cache (db.ts), so the
+// session survives switching or re-cloning checkouts.
+const CACHE_DIR = join(homedir(), ".cache", "dw");
 
 export const TURN_MINUTES = 10;
 export const DEFAULT_CHECK_EVERY = 2;
@@ -21,7 +22,7 @@ export interface TurnState {
 
 export function statePath(): string {
   const env = process.env.DW_SESSION?.trim();
-  return env || join(REPO_ROOT, "dw-session.json");
+  return env || join(CACHE_DIR, "dw-session.json");
 }
 
 export function freshState(): TurnState {

@@ -145,8 +145,9 @@ dw turn check-every 3         # wandering-check cadence (default every 2 turns)
 dw turn end                   # end the session and clear state
 ```
 
-State survives between invocations in `dw-session.json` (gitignored, next to the
-install). A missing or unreadable state file starts a fresh session with a note.
+State survives between invocations in `~/.cache/dw/dw-session.json` (same home
+as the index cache; override with `DW_SESSION`). A missing or unreadable state
+file starts a fresh session with a note.
 
 ## Status
 

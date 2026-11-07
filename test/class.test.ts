@@ -217,3 +217,50 @@ test("parses magician starting spell books with their spells", () => {
   expect(c.spellBooks[2].name).toBe("Wind Grimoire");
   expect(c.spellBooks[2].spells).toEqual(["Gust", "Calm"]);
 });
+
+test("parses every advancement row, with extra columns kept by name", () => {
+  const page = [
+    "Enchanter",
+    "Prime Abilities        Charisma",
+    "Hit Points             1d6 per Level",
+    "Armour                 Light",
+    "Weapons                Any",
+    "Level   XP       Hit Points   Attack   Charms   Doom   Ray   Hold   Blast   Spell",
+    "1       0        1d6          +0       1        10     18    9      20      15",
+    "2       1,600    +1d6         +0       2        10     18    9      20      15",
+    "3       3,200    +1d6         +1       2        9      17    8      19      14",
+    "4       6,400    +1           +1       3        9      17    8      19      14",
+    "",
+    "Some prose that follows the table.",
+  ].join("\n");
+  const c = parseClasses([page])[0];
+  expect(c.nextLevelXp).toBe(1600);
+  expect(c.advancement).toHaveLength(4);
+  expect(c.advancement![2]).toEqual({
+    level: 3,
+    xp: 3200,
+    hitPoints: "+1d6",
+    attack: 1,
+    saves: { doom: 9, ray: 17, hold: 8, blast: 19, spell: 14 },
+    extras: { Charms: "2" },
+  });
+  expect(c.advancement![3].hitPoints).toBe("+1");
+});
+
+test("detects a class that rolls for a new rune on each level", () => {
+  const page = [
+    "Bard",
+    "Prime Abilities        Charisma",
+    "Hit Points             1d6 per Level",
+    "Armour                 Light",
+    "Weapons                Any",
+    "Level   XP   Hit Points   Attack   Doom   Ray   Hold   Blast   Spell",
+    "1       0    1d6          +0       11     17    12     19      16",
+    "",
+    "At Level 1: A bard knows one randomly selected rune of dim magnitude.",
+    "Subsequent Levels: Each time the character gains a Level, the player",
+    "should roll for the chance of acquiring a new rune.",
+  ].join("\n");
+  expect(parseClasses([page])[0]).toMatchObject({ runeOnLevel: true, startingRune: "dim" });
+  expect(parseClasses([thiefPage])[0].runeOnLevel).toBe(false);
+});

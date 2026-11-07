@@ -22,6 +22,17 @@ export interface SpellBook {
   spells: string[];
 }
 
+/** One row of a class's advancement table. */
+export interface LevelRow {
+  level: number;
+  xp: number; // total XP needed to reach this level
+  hitPoints: string; // "1d6" at level 1, "+1d6" or "+1" thereafter
+  attack: number;
+  saves: { doom: number; ray: number; hold: number; blast: number; spell: number };
+  /** Any other columns the table carries (e.g. a count of glamours known). */
+  extras: Record<string, string>;
+}
+
 export interface ParsedClass {
   id: string;
   name: string;
@@ -31,12 +42,17 @@ export interface ParsedClass {
   primeAbilities: Ability[]; // e.g. ["cha", "dex"]; drives the score-adjustment step
   attack: number; // level-1 attack bonus
   nextLevelXp: number; // XP required for level 2
+  advancement?: LevelRow[]; // every level of the advancement table (absent in old indexes)
   saves: { doom: number; ray: number; hold: number; blast: number; spell: number };
   skills: Record<string, number>; // level-1 skill targets (empty if the class has none)
   languages: string[]; // bonus languages the class grants
   traits: Trait[]; // named class abilities (empty if none parsed)
   startingEquipment: StartingEquipment | null; // parsed from the Starting Equipment section
   spellBooks: SpellBook[]; // magician only; empty for others
+  /** Rolls for the chance of a new rune on gaining a level (from the class text). */
+  runeOnLevel?: boolean;
+  /** Magnitude of the random rune known at level 1, when the class has one. */
+  startingRune?: string;
 }
 
 const ABILITY_BY_NAME: Record<string, Ability> = {
@@ -87,9 +103,28 @@ export function parseClasses(pages: string[]): ParsedClass[] {
       traits,
       startingEquipment,
       spellBooks,
+      ...runeRules(pages, page),
     });
   }
   return out;
+}
+
+/** Does the class text grant a chance at a new rune each time a level is gained,
+ *  and a random rune of some magnitude at level 1? */
+function runeRules(
+  pages: string[],
+  page: number,
+): Pick<ParsedClass, "runeOnLevel" | "startingRune"> {
+  const text = pages
+    .slice(page, page + 2)
+    .map((p) => splitProseColumns(p).join("\n"))
+    .join("\n")
+    .replace(/\s+/g, " ");
+  const start = text.match(/At Level 1:[^.]*?\brandomly selected rune of (\w+) magnitude/i);
+  return {
+    runeOnLevel: /each time the character gains a Level[^.]*\brunes?\b/i.test(text),
+    ...(start ? { startingRune: start[1].toLowerCase() } : {}),
+  };
 }
 
 /** Bonus languages a class grants, read from a "speak X[, Y]" phrase in its
@@ -145,11 +180,12 @@ function parseStatBlock(
   };
 }
 
-/** Parse the level-1 (and level-2 XP) rows of the advancement table, by header name. */
+/** Parse the advancement table, by header name: the level-1 row, the XP for
+ *  level 2, and every row as a LevelRow. */
 function parseLevel1(
   pages: string[],
   page: number,
-): Pick<ParsedClass, "attack" | "saves" | "nextLevelXp"> | null {
+): Pick<ParsedClass, "attack" | "saves" | "nextLevelXp" | "advancement"> | null {
   for (const pg of [page, page + 1]) {
     if (pg >= pages.length) continue;
     const lines = pages[pg].split("\n");
@@ -159,25 +195,61 @@ function parseLevel1(
     if (h < 0) continue;
 
     const cols = cells(lines[h]);
-    let level1: { attack: number; saves: ParsedClass["saves"] } | null = null;
-    let nextLevelXp = 0;
+    const rows: LevelRow[] = [];
     for (let i = h + 1; i < lines.length; i++) {
       const row = cells(lines[i]);
-      if (row[0] === "1" && !level1) {
-        level1 = {
-          attack: num(row[cols.indexOf("Attack")]),
-          saves: Object.fromEntries(
-            SAVES.map((s) => [s.toLowerCase(), num(row[cols.indexOf(s)])]),
-          ) as ParsedClass["saves"],
-        };
-      } else if (row[0] === "2" && level1) {
-        nextLevelXp = num(row[cols.indexOf("XP")]);
-        break;
+      if (row.length === 0) {
+        if (rows.length > 0) break;
+        continue;
       }
+      if (!/^\d+$/.test(row[0])) {
+        if (rows.length > 0) break;
+        continue;
+      }
+      const level = parseInt(row[0], 10);
+      if (level !== rows.length + 1) break; // a different table's numbering
+      rows.push(levelRow(cols, row));
     }
-    if (level1) return { ...level1, nextLevelXp };
+    if (rows.length === 0) continue;
+    return {
+      attack: rows[0].attack,
+      saves: rows[0].saves,
+      nextLevelXp: rows[1]?.xp ?? 0,
+      advancement: rows,
+    };
   }
   return null;
+}
+
+/** Map an advancement row's cells to a LevelRow. The leading Level/XP/Hit
+ *  Points/Attack and trailing save columns are fixed; anything between is kept
+ *  as a named extra. A row with an empty extra cell is read from both ends. */
+function levelRow(cols: string[], row: string[]): LevelRow {
+  const at = (label: string): string | undefined => {
+    const k = cols.indexOf(label);
+    if (k < 0) return undefined;
+    // Columns after the extras are read from the right, so a blank extra cell
+    // doesn't shift the saves.
+    const fromRight = cols.length - k;
+    return k < 4 ? row[k] : row[row.length - fromRight];
+  };
+  const saves = Object.fromEntries(
+    SAVES.map((s) => [s.toLowerCase(), num(at(s))]),
+  ) as LevelRow["saves"];
+  const extras: Record<string, string> = {};
+  const fixed = new Set(["Level", "XP", "Hit Points", "Attack", ...SAVES]);
+  cols.forEach((c, k) => {
+    if (fixed.has(c) || k >= row.length) return;
+    if (row.length === cols.length) extras[c] = row[k];
+  });
+  return {
+    level: num(row[0]),
+    xp: num(at("XP")),
+    hitPoints: at("Hit Points") ?? "",
+    attack: num(at("Attack")),
+    saves,
+    extras,
+  };
 }
 
 /**

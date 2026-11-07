@@ -1,7 +1,12 @@
 import type { Database } from "bun:sqlite";
-import { isFresh, markBuilt } from "./db.ts";
+import { isFresh, markBuilt, setLookup } from "./db.ts";
 import { parseAdventuringItems } from "./parse/equipment.ts";
 import { parseClasses } from "./parse/class.ts";
+import { parseCatalog, parseEncumbrance } from "./parse/gear.ts";
+import { parseGlamoursTable } from "./parse/glamour.ts";
+import { parseKnacksTable } from "./parse/knack.ts";
+import { parseRunes } from "./parse/rune.ts";
+import { kindredXpBonus, kindredXpBonuses, parsePrimeXpModifiers } from "./parse/xp.ts";
 import { parseHexes, withBookmarks } from "./parse/hex.ts";
 import { parseKindreds } from "./parse/kindred.ts";
 import { parseMonsters } from "./parse/monster.ts";
@@ -45,6 +50,8 @@ export function build(db: Database, book: Book, path: string): BuildResult {
   const hexes =
     book === "campaign" ? withBookmarks(hexBookmarks(path), parseHexes(pages), pages) : [];
   const adventuringItems = book === "players" ? parseAdventuringItems(pages) : [];
+  // Party-management rules: item weights, encumbrance, XP modifiers, runes.
+  const rules = book === "players" ? partyRules(pages, kindreds) : null;
 
   db.transaction(() => {
     db.query("DELETE FROM pages WHERE book = ?").run(book);
@@ -102,6 +109,8 @@ export function build(db: Database, book: Book, path: string): BuildResult {
       );
     }
 
+    if (rules) for (const [name, data] of Object.entries(rules)) setLookup(db, book, name, data);
+
     markBuilt(db, book, path);
   })();
 
@@ -113,6 +122,26 @@ export function build(db: Database, book: Book, path: string): BuildResult {
     monsters: monsters.filter((m) => !m.parent).length,
     subCreatures: monsters.filter((m) => m.parent).length,
     hexes: hexes.length,
+  };
+}
+
+/** The lookups party management needs, parsed from the Player's Book. */
+function partyRules(
+  pages: string[],
+  kindreds: ReturnType<typeof parseKindreds>,
+): Record<string, unknown> {
+  const prose = kindredXpBonuses(pages, kindreds);
+  const kindredXp = Object.fromEntries(
+    kindreds.map((k) => [k.id, kindredXpBonus(k.traits) || prose[k.id] || 0]),
+  );
+  return {
+    catalog: parseCatalog(pages),
+    encumbrance: parseEncumbrance(pages),
+    runes: parseRunes(pages),
+    prime_xp: parsePrimeXpModifiers(pages),
+    kindred_xp: kindredXp,
+    glamours: parseGlamoursTable(pages),
+    knacks: parseKnacksTable(pages),
   };
 }
 

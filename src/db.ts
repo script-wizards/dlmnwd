@@ -11,6 +11,10 @@ import type { Hex, Monster } from "./schema.ts";
 const CACHE_DIR = join(homedir(), ".cache", "dw");
 const DB_PATH = join(CACHE_DIR, "dw.db");
 
+// Bump when a parser starts producing new or reshaped data, so an index built by
+// an older version is rebuilt even though the PDF itself hasn't changed.
+export const INDEX_VERSION = 4;
+
 export interface SearchHit {
   book: string;
   page: number;
@@ -41,6 +45,9 @@ export function migrate(db: Database): void {
   db.run(`CREATE TABLE IF NOT EXISTS sources (
     book TEXT PRIMARY KEY, path TEXT NOT NULL, size INTEGER, mtime REAL, built_at TEXT
   )`);
+  const cols = db.query("PRAGMA table_info(sources)").all() as { name: string }[];
+  if (!cols.some((c) => c.name === "version"))
+    db.run("ALTER TABLE sources ADD COLUMN version INTEGER NOT NULL DEFAULT 1");
   db.run(`CREATE TABLE IF NOT EXISTS pages (
     book TEXT NOT NULL, page INTEGER NOT NULL, text TEXT NOT NULL,
     PRIMARY KEY (book, page)
@@ -78,19 +85,25 @@ export function migrate(db: Database): void {
 /** True when the stored index matches the PDF currently on disk. */
 export function isFresh(db: Database, book: string, path: string): boolean {
   const st = statSync(path);
-  const row = db.query("SELECT size, mtime FROM sources WHERE book = ?").get(book) as {
+  const row = db.query("SELECT size, mtime, version FROM sources WHERE book = ?").get(book) as {
     size: number;
     mtime: number;
+    version: number;
   } | null;
-  return row !== null && row.size === st.size && row.mtime === st.mtimeMs;
+  return (
+    row !== null &&
+    row.size === st.size &&
+    row.mtime === st.mtimeMs &&
+    row.version === INDEX_VERSION
+  );
 }
 
 export function markBuilt(db: Database, book: string, path: string): void {
   const st = statSync(path);
   db.query(
-    `INSERT OR REPLACE INTO sources (book, path, size, mtime, built_at)
-     VALUES (?, ?, ?, ?, ?)`,
-  ).run(book, path, st.size, st.mtimeMs, new Date().toISOString());
+    `INSERT OR REPLACE INTO sources (book, path, size, mtime, built_at, version)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  ).run(book, path, st.size, st.mtimeMs, new Date().toISOString(), INDEX_VERSION);
 }
 
 /** Full-text search across all indexed pages. */
@@ -253,4 +266,20 @@ export function getLookupTable(db: Database, book: string, name: string): string
     data: string;
   } | null;
   return row ? (JSON.parse(row.data) as string[]) : [];
+}
+
+/** Retrieve a structured lookup (e.g. the equipment catalog) from the index. */
+export function getLookup<T>(db: Database, book: string, name: string): T | null {
+  const row = db
+    .query("SELECT data FROM lookup_tables WHERE book = ? AND name = ?")
+    .get(book, name) as { data: string } | null;
+  return row ? (JSON.parse(row.data) as T) : null;
+}
+
+export function setLookup(db: Database, book: string, name: string, data: unknown): void {
+  db.query("INSERT OR REPLACE INTO lookup_tables (book, name, data) VALUES (?, ?, ?)").run(
+    book,
+    name,
+    JSON.stringify(data),
+  );
 }

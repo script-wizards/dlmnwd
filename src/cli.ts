@@ -7,6 +7,8 @@ import { cmdMon } from "./commands/mon.ts";
 import { cmdMorale } from "./commands/morale.ts";
 import { cmdNew } from "./commands/new.ts";
 import { cmdNpc } from "./commands/npc.ts";
+import { cmdParty } from "./commands/party.ts";
+import { cmdPc } from "./commands/pc.ts";
 import { cmdReact } from "./commands/react.ts";
 import { cmdRoll } from "./commands/roll.ts";
 import { cmdSearch } from "./commands/search.ts";
@@ -42,7 +44,17 @@ From your PDF (indexed into a local SQLite db; see README)
   list <category>      Print names: monsters|spells|hexes|kindreds|classes
   new [kindred] [class]  Roll a level-1 PC, emit a vault markdown sheet
                          (omit either, or pass "random", to roll it)
-                         (--name=, --player=, --alignment=, --out=file.md)
+                         (--name=, --player=, --alignment=, --out=file.md,
+                         --party to add them to the party)
+
+Party (saved locally; see dw party path)
+  party                The party: level, XP, HP, AC, load, Speed
+                         import <sheet.pdf…> | new | rm | xp <n> [names…]
+                         | enc weight|slots|basic | rest [days]   (dw party help)
+  pc <name> [cmd]      One character: gear, coins, HP, XP, level-up, magic
+                         item add|rm|set, equip, stow, coins, bank, hp, xp,
+                         levelup, glamour, rune add|rm|use|learn, set, sheet
+                         (dw pc help)
 
   mon/spell/hex with no argument open an fzf picker with a live preview
   (when run in a terminal with fzf installed).
@@ -51,7 +63,7 @@ From your PDF (indexed into a local SQLite db; see README)
   help                 This message
 `;
 
-const commands: Record<string, (a: string[]) => void> = {
+const commands: Record<string, (a: string[]) => void | Promise<void>> = {
   roll: cmdRoll,
   react: cmdReact,
   morale: cmdMorale,
@@ -66,6 +78,8 @@ const commands: Record<string, (a: string[]) => void> = {
   spell: cmdSpell,
   list: cmdList,
   new: cmdNew,
+  party: cmdParty,
+  pc: cmdPc,
 };
 
 const [cmd, ...args] = process.argv.slice(2);
@@ -81,7 +95,7 @@ try {
     console.log(HELP);
     process.exit(1);
   }
-  fn(args);
+  await fn(args);
 } catch (e) {
   console.error((e as Error).message);
   process.exit(1);

@@ -170,6 +170,26 @@ reason to exist; never add an upload affordance.
 - Deploys to Cloudflare Pages as the static `dist/` build; bundled at dlmnwd.com with an
   `og.png` social card.
 
+### Party management
+
+`src/party/` keeps the user's characters (`store.ts`: one JSON file at
+`$DW_PARTY` → `$XDG_DATA_HOME/dw/party.json` → `~/.local/share/dw/party.json`,
+written atomically, never overwritten when unreadable). It is user data, not a
+cache. Everything else in `src/party/` is pure and takes a `PartyRules` bundle
+(`rules.ts`) of book-derived tables that `build.ts` stores in `lookup_tables`:
+`catalog` (`parse/gear.ts`: every item with a listed weight), `encumbrance`
+(weight/slot/basic tables, gear-slot examples), `runes` (`parse/rune.ts`),
+`prime_xp`/`kindred_xp` (`parse/xp.ts`), `glamours`, `knacks`. Class
+advancement rows live on `ParsedClass.advancement`. Missing tables fall back to
+the generic defaults in `src/rules.ts`. Tests build `PartyRules` by hand with
+invented content (`test/party.test.ts`).
+
+`dw party import` reads a fillable sheet's form fields via pdf.js
+(`src/pdf/fields.ts`) and maps them in `party/import.ts`. Items are resolved
+against the catalog (`party/items.ts`), and the book's weight wins over the
+sheet's (disagreements are reported). Bump `INDEX_VERSION` in `db.ts` whenever a
+parser's output changes shape, so existing indexes rebuild.
+
 ### Character generation
 
 `src/gen/character.ts` rolls a level-1 PC: 3d6 per ability, HP from the class hit die +

@@ -149,10 +149,60 @@ State survives between invocations in `~/.cache/dw/dw-session.json` (same home
 as the index cache; override with `DW_SESSION`). A missing or unreadable state
 file starts a fresh session with a note.
 
+## The party
+
+`dw party` and `dw pc` keep the characters you're running: gear, coins, HP, XP,
+levels, glamours, and runes. Item weights, the encumbrance tables, the
+advancement tables, XP modifiers, and the rune tables are all read from your
+Player's Book. Load and Speed are rechecked after every change.
+
+```sh
+dw party import sheets/*.pdf       # bring in filled-in fillable PDF character sheets
+dw party new <kindred> <class>     # or roll a level-1 PC straight into the party
+dw new --party                     # (same, from dw new)
+dw party                           # level, XP, HP, AC, load, and Speed for everyone
+
+dw pc pip                       # one character (any unambiguous part of the name)
+dw pc pip item add rope         # looked up in the book's equipment lists
+dw pc pip item add torches 2    # -e/--equipped, -s/--stowed, --weight=N, --slots=N
+dw pc pip item rm rations 1
+dw pc pip stow longbow          # / equip
+dw pc pip coins +120gp -5sp
+dw pc pip bank 1700gp           # banked coins don't weigh anything (withdraw: back)
+dw pc pip hp -3                 # +N, =N, max
+
+dw party xp 4000                   # split evenly, then each member's XP modifier
+dw pc pip levelup               # rolls HP (+CON), new Attack and Saves (--hp=N: your roll)
+
+dw pc pip glamour add "<glamour>"    # or: glamour add --random / glamour rm …
+dw pc pip rune add "<rune>"          # a duplicate grant doubles its uses
+dw pc pip rune use <rune>            # refuses when today's (week's, level's…) uses are spent
+dw pc pip rune learn                 # 2d6 + level bonus on the rune-granted table
+dw party rest                           # next day: daily rune uses come back
+
+dw party enc slots                 # weight (default), slots, or basic
+dw pc pip sheet --out=PCs/Pip.md  # a vault Markdown sheet
+```
+
+Every load check prints the current Speed, says when it changed, and flags a
+broken limit: carrying more than the maximum, too many equipped or stowed slots,
+no backpack or sack, or a bulky item packed away. Importing a sheet reports any
+weight that disagrees with the book and any item the book doesn't list. Set the
+right weight with `dw pc <name> item set "<item>" weight=N`.
+
+Rune usage counts against the party's day (`dw party rest`) and the caster's
+current level, so "once per day", "once per week", "once per Level", and
+"once ever" each behave as written. A year is taken to be 365 days.
+
+The party is saved at `~/.local/share/dw/party.json` (or `$XDG_DATA_HOME/dw/`;
+override with `DW_PARTY`). It's your campaign state, not a cache, so it is
+written atomically and never replaced if it can't be read. `dw party path`
+prints where it is.
+
 ## Status
 
 Working: `roll`, `react`, `morale`, `init`, `wander`, `turn`, `npc`, `mon`,
-`hex`, `build`, `search`, `spell`, `new`.
+`hex`, `build`, `search`, `spell`, `new`, `party`, `pc`.
 
 `dw init` rolls side-based initiative: 1d6 per side (default Party vs Enemies,
 or name your own with `dw init goblins party wolves`), highest acts first, ties

@@ -100,3 +100,32 @@ export function rollKindredClass<K extends KindredChoice, C extends ClassChoice>
   const chosen = pick(candidates);
   return { kindred: chosen.kindred, klass: pick(chosen.classes) };
 }
+
+// Encumbrance defaults, used when the book's tables couldn't be read. The weight
+// bands are the standard B/X spread (coins carried → speed, scaled to a 40'
+// base); the slot costs are the common gear-slot convention.
+export const DEFAULT_WEIGHT_BANDS = [
+  { max: 400, speed: 40 },
+  { max: 600, speed: 30 },
+  { max: 800, speed: 20 },
+  { max: 1600, speed: 10 },
+];
+
+export const SLOT_COST = {
+  general: 1,
+  bulky: 2,
+  armour: { light: 1, medium: 2, heavy: 3 } as Record<string, number>,
+  shield: 1,
+  twoHanded: 2,
+  oneHanded: 1,
+  missile: 1,
+  ammo: 1,
+};
+
+/** B/X prime-requisite XP adjustments, used when the book's table is unread. */
+export const DEFAULT_PRIME_XP = [
+  { min: 3, max: 5, percent: -20 },
+  { min: 6, max: 8, percent: -10 },
+  { min: 13, max: 15, percent: 5 },
+  { min: 16, max: 18, percent: 10 },
+];
